@@ -1,0 +1,66 @@
+import tkinter as tk
+from tkinter import messagebox
+
+class Event:
+    def __init__(self, name, available_tickets):
+        self.name = name
+        self.available_tickets = available_tickets
+
+class TicketBookingApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Ticket Booking App")
+        
+        self.events = [
+            Event("Concert A", 100),
+            Event("Concert B", 75),
+            Event("Concert C", 50)
+        ]
+        
+        self.selected_event = None
+        
+        self.create_widgets()
+    
+    def create_widgets(self):
+        tk.Label(self.root, text="Select an Event:").grid(row=0, column=0, pady=10)
+        
+        self.event_var = tk.StringVar(value=self.events[0].name)
+        for i, event in enumerate(self.events):
+            tk.Radiobutton(self.root, text=event.name, variable=self.event_var, value=event.name, command=self.select_event).grid(row=i+1, column=0, sticky='w')
+        
+        self.ticket_label = tk.Label(self.root, text="Tickets Available: ")
+        self.ticket_label.grid(row=0, column=1, padx=20)
+        
+        tk.Label(self.root, text="Number of Tickets:").grid(row=len(self.events)+1, column=0, pady=10)
+        self.num_tickets_var = tk.IntVar(value=1)
+        tk.Entry(self.root, textvariable=self.num_tickets_var).grid(row=len(self.events)+1, column=1)
+        
+        tk.Button(self.root, text="Book Tickets", command=self.book_tickets).grid(row=len(self.events)+2, column=0, columnspan=2, pady=20)
+        
+        self.select_event()
+
+    def select_event(self):
+        event_name = self.event_var.get()
+        for event in self.events:
+            if event.name == event_name:
+                self.selected_event = event
+                self.ticket_label.config(text=f"Tickets Available: {event.available_tickets}")
+                break
+    
+    def book_tickets(self):
+        num_tickets = self.num_tickets_var.get()
+        if num_tickets <= 0:
+            messagebox.showerror("Invalid Input", "Number of tickets must be greater than zero.")
+            return
+        
+        if self.selected_event.available_tickets >= num_tickets:
+            self.selected_event.available_tickets -= num_tickets
+            self.ticket_label.config(text=f"Tickets Available: {self.selected_event.available_tickets}")
+            messagebox.showinfo("Success", f"{num_tickets} tickets booked for {self.selected_event.name}.")
+        else:
+            messagebox.showwarning("Insufficient Tickets", "Not enough tickets available.")
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = TicketBookingApp(root)
+    root.mainloop()
